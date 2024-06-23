@@ -1,0 +1,4 @@
+/build/
+payment_processor
+test_runner
+*.log
