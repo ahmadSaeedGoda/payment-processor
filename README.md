@@ -15,7 +15,7 @@ make clean && make && make run
 ## Test
 1. Ensure you have `cmake` installed.
 2. Ensure you have no `build` dir at the project root dir. Either remove it or run `make clean` first.
-3. Ensure you're pointing to the <root-dir> in CLI.
+3. Ensure you're pointing to the project root dir in CLI.
 4. Run:<br>
 ```sh
 mkdir build && cd build
@@ -35,8 +35,8 @@ Enjoy..
 Drink Water, Get hydrated
 
 ## TODOS
-- Use Mocks for testing without deps.
+- Use Mocks for testing without deps (loggers).
 - Use in-memory data structures to store transactions.
 
 ### Disclaimer
-Built & Tested on `Linux/Ubuntu 22.04.4 LTS 64-bit` and `GNOME Version 42.9`.
+Built & Tested on `Linux/Ubuntu 22.04.4 LTS 64-bit` with `GNOME Version 42.9`.
