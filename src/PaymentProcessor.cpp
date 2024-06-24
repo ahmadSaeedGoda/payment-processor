@@ -4,6 +4,7 @@
 using namespace std;
 
 const string PaymentProcessor::ACCOUNT_PREFIX = "ACC_";
+const double PaymentProcessor::MIN_AMOUNT = 1.0;
 
 PaymentProcessor::PaymentProcessor(FileLogger &logger) : logger(logger) {}
 
@@ -15,7 +16,7 @@ void PaymentProcessor::createAccount(const string &ownerName, double initialBala
 
     Account *acc = new Account(accountId, ownerName, initialBalance);
 
-    accounts.push_back(acc);
+    accounts.emplace_back(acc);
 
     // Log account creation
     stringstream ss;
@@ -33,6 +34,14 @@ bool PaymentProcessor::processTransaction(const string &fromAccountId, const str
     if (fromAccount == nullptr || toAccount == nullptr)
     {
         logger.log("Transaction failed: Invalid account ID");
+        return false;
+    }
+
+    if (amount < MIN_AMOUNT)
+    {
+        stringstream ss;
+        ss << "Transaction failed: Minimum amount for a valid transaction is: " << MIN_AMOUNT;
+        logger.log(ss.str());
         return false;
     }
 

@@ -2,7 +2,6 @@
 #include "../include/ConsoleLogger.h"
 #include "../include/PaymentProcessor.h"
 
-#include <algorithm>
 #include <sstream>
 
 using namespace std;
@@ -16,7 +15,7 @@ namespace util
 
         for (size_t i = 0; i < CUSTOMERS.size(); ++i)
         {
-            customerList.push_back(Customer{CUSTOMERS[i], INITIAL_BALANCES[i]});
+            customerList.emplace_back(Customer{CUSTOMERS[i], INITIAL_BALANCES[i]});
         }
 
         return customerList;

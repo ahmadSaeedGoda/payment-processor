@@ -56,7 +56,16 @@
     "fstream": "cpp",
     "sstream": "cpp",
     "cstring": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "any": "cpp",
+    "forward_list": "cpp",
+    "list": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "unordered_set": "cpp",
+    "optional": "cpp",
+    "iomanip": "cpp",
+    "variant": "cpp"
   },
   "cSpell.words": ["ctest", "PAYMENTPROCESSOR"],
   "C_Cpp.default.compilerPath": "/usr/bin/g++-12"

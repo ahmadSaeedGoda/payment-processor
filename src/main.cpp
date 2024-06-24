@@ -20,34 +20,22 @@ int main()
         processor.createAccount(customer.name, customer.balance);
     }
 
+    auto lambda = [&processor](int acc1, int acc2, double amount) -> bool
+    {
+        string acc1Id = ACC_PREFIX + to_string(acc1);
+        string acc2Id = ACC_PREFIX + to_string(acc2);
+        return processor.processTransaction(acc1Id, acc2Id, amount);
+    };
+
     vector<thread> threads;
-    threads.emplace_back(
-        ([&processor]()
-         { processor.processTransaction(
-               ACC_PREFIX + to_string(1),
-               ACC_PREFIX + to_string(2),
-               200.0); })); // 1=800, 2=700
 
-    threads.emplace_back(
-        ([&processor]()
-         { processor.processTransaction(
-               ACC_PREFIX + to_string(2),
-               ACC_PREFIX + to_string(3),
-               150.0); })); // 2=550, 3=850
+    threads.emplace_back((lambda), 1, 2, 200); // 1=800, 2=700
 
-    threads.emplace_back(
-        ([&processor]()
-         { processor.processTransaction(
-               ACC_PREFIX + to_string(1),
-               ACC_PREFIX + to_string(3),
-               300.0); })); // 1=500, 3=1150
+    threads.emplace_back((lambda), 2, 3, 150); // 2=550, 3=850
 
-    threads.emplace_back(
-        ([&processor]()
-         { processor.processTransaction(
-               ACC_PREFIX + to_string(1),
-               ACC_PREFIX + to_string(4),
-               99999.9999); })); // Must Fail, because there is no account 4 created
+    threads.emplace_back((lambda), 1, 3, 300); // 1=500, 3=1150
+
+    threads.emplace_back((lambda), 1, 4, 99999.9999); // Must Fail, because there is no account 4 created
 
     for (auto &thread : threads)
     {
