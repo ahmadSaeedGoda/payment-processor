@@ -1,10 +1,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include "../include/ConsoleLogger.h"
-#include "../include/PaymentProcessor.h"
-#include <string>
-#include <vector>
+#include "ConsoleLogger.h"
+#include "PaymentProcessor.h"
 
 using namespace std;
 
@@ -20,7 +18,8 @@ namespace util
     };
 
     vector<Customer> createCustomersWithInitialBalances();
-    void printCustomersBalancesAfterTxsProcessing(vector<Customer> &customerList, PaymentProcessor &processor);
+    void printCustomersBalancesAfterTxsProcessing(PaymentProcessor &processor);
+    void printProcessedTxs(PaymentProcessor &processor);
 }
 
 #endif // UTILITY_H

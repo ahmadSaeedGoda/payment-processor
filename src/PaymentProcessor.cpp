@@ -1,4 +1,6 @@
 #include "../include/PaymentProcessor.h"
+#include "../include/Transaction.h"
+
 #include <sstream>
 
 using namespace std;
@@ -14,48 +16,34 @@ void PaymentProcessor::createAccount(const string &ownerName, double initialBala
 
     string accountId = generateAccountId();
 
-    Account *acc = new Account(accountId, ownerName, initialBalance);
+    auto acc = make_unique<Account>(accountId, ownerName, initialBalance);
 
-    accounts.emplace_back(acc);
+    accounts.emplace_back(move(acc));
 
     // Log account creation
-    stringstream ss;
-    ss << "Created account for " << ownerName << " with ID: " << accountId;
-    logger.log(ss.str());
+    logger.log("Created account for " + ownerName + " with ID: " + accountId);
 }
 
 bool PaymentProcessor::processTransaction(const string &fromAccountId, const string &toAccountId, double amount)
 {
     lock_guard<mutex> lock(accountsMutex);
+    lock_guard<mutex> txLock(txsMutex);
 
-    Account *fromAccount = findAccountById(fromAccountId);
-    Account *toAccount = findAccountById(toAccountId);
-
-    if (fromAccount == nullptr || toAccount == nullptr)
+    try
     {
-        logger.log("Transaction failed: Invalid account ID");
+        Account &fromAccount = findAccountById(fromAccountId);
+        Account &toAccount = findAccountById(toAccountId);
+
+        auto tx = make_unique<Transaction>(&fromAccount, &toAccount, amount);
+        tx->execute();
+
+        txs.emplace_back(move(tx));
+    }
+    catch (const exception &e)
+    {
+        logger.log(e.what());
         return false;
     }
-
-    if (amount < MIN_AMOUNT)
-    {
-        stringstream ss;
-        ss << "Transaction failed: Minimum amount for a valid transaction is: " << MIN_AMOUNT;
-        logger.log(ss.str());
-        return false;
-    }
-
-    if (fromAccount->getBalance() < amount)
-    {
-        stringstream ss;
-        ss << "Transaction failed: Insufficient funds in account " << fromAccountId;
-        logger.log(ss.str());
-        return false;
-    }
-
-    // Perform transaction
-    fromAccount->withdraw(amount);
-    toAccount->deposit(amount);
 
     // Log transaction details
     stringstream ss;
@@ -69,17 +57,17 @@ double PaymentProcessor::getAccountBalance(const string &accountId)
 {
     lock_guard<mutex> lock(accountsMutex);
 
-    Account *account = findAccountById(accountId);
-
-    if (account == nullptr)
+    try
     {
-        stringstream ss;
-        ss << "Account not found: " << accountId;
-        logger.log(ss.str());
+        Account &account = findAccountById(accountId);
+        return account.getBalance();
+    }
+    catch (const exception &e)
+    {
+        logger.log("Account not found: " + accountId);
 
         return -0.0;
     }
-    return account->getBalance();
 }
 
 string PaymentProcessor::generateAccountId()
@@ -87,14 +75,45 @@ string PaymentProcessor::generateAccountId()
     return ACCOUNT_PREFIX + to_string(accounts.size() + 1);
 }
 
-Account *PaymentProcessor::findAccountById(const string &accountId)
+Account &PaymentProcessor::findAccountById(const string &accountId)
 {
-    for (auto account : accounts)
+    for (auto &account : accounts)
     {
-        if (account->getId() == ACCOUNT_PREFIX + accountId)
+        if (account->getId() == accountId)
         {
-            return account;
+            return *account;
         }
     }
-    return nullptr;
+
+    throw runtime_error("Account not found");
+}
+
+vector<unique_ptr<Account>> PaymentProcessor::getAccounts()
+{
+    lock_guard<mutex> lock(accountsMutex);
+
+    vector<unique_ptr<Account>> copyAccounts;
+    copyAccounts.reserve(accounts.size());
+
+    for (const auto &account : accounts)
+    {
+        copyAccounts.push_back(make_unique<Account>(*account));
+    }
+
+    return copyAccounts;
+}
+
+vector<unique_ptr<Transaction>> PaymentProcessor::getTxs()
+{
+    lock_guard<mutex> lock(txsMutex);
+
+    vector<unique_ptr<Transaction>> copyTxs;
+    copyTxs.reserve(txs.size());
+
+    for (const auto &tx : txs)
+    {
+        copyTxs.push_back(make_unique<Transaction>(*tx));
+    }
+
+    return copyTxs;
 }

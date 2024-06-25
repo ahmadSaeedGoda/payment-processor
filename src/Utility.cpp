@@ -2,8 +2,6 @@
 #include "../include/ConsoleLogger.h"
 #include "../include/PaymentProcessor.h"
 
-#include <sstream>
-
 using namespace std;
 
 namespace util
@@ -17,25 +15,37 @@ namespace util
         {
             customerList.emplace_back(Customer{CUSTOMERS[i], INITIAL_BALANCES[i]});
         }
-
         return customerList;
     }
 
-    void printCustomersBalancesAfterTxsProcessing(vector<Customer> &customerList, PaymentProcessor &processor)
+    void printCustomersBalancesAfterTxsProcessing(PaymentProcessor &processor)
     {
         Logger *consoleLogger = new ConsoleLogger();
 
         consoleLogger->log("Final Balances:");
 
-        for (size_t i = 0; i < customerList.size(); i++)
+        vector<unique_ptr<Account>> ppAccounts = processor.getAccounts();
+
+        for (const auto &acc : ppAccounts)
         {
-            const string ab = to_string(processor.getAccountBalance(to_string(i + 1)));
-            stringstream ss;
-            ss << customerList[i].name << ": " << ab;
+            consoleLogger->log(acc->getName() + ": " + to_string(acc->getBalance()));
+        }
 
-            const string message = ss.str();
+        delete consoleLogger;
+    }
 
-            consoleLogger->log(message);
+    void printProcessedTxs(PaymentProcessor &processor)
+    {
+        Logger *consoleLogger = new ConsoleLogger();
+
+        consoleLogger->log("Processed Transactions:");
+
+        vector<unique_ptr<Transaction>> ppTxs = processor.getTxs();
+
+        for (const auto &tx : ppTxs)
+        {
+            consoleLogger->log(
+                "[" + to_string(tx->getTimestamp()) + "]" + ": From " + tx->getSender()->getName() + " to " + tx->getReceiver()->getName() + ", amount = " + to_string(tx->getAmount()));
         }
 
         delete consoleLogger;

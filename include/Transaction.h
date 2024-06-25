@@ -1,20 +1,29 @@
 #ifndef TRANSACTION_H
 #define TRANSACTION_H
 
-#include <string>
-#include <ctime>
+#include "Account.h"
+#include <vector>
+
 using namespace std;
 
 class Transaction
 {
 public:
+    Transaction(Account *fromAccount, Account *toAccount, double amount);
+
+    void execute();
+    string getId();
+    Account *getSender();
+    Account *getReceiver();
+    double getAmount();
+    time_t getTimestamp();
+
+private:
     string transactionId;
-    string fromAccountId;
-    string toAccountId;
+    Account *fromAccount;
+    Account *toAccount;
     double amount;
     time_t timestamp;
-
-    Transaction(const string &transId, const string &fromId, const string &toId, double amt);
 };
 
 #endif // TRANSACTION_H

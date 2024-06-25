@@ -36,7 +36,6 @@ Drink Water, Get hydrated
 
 ## TODOS
 - Use Mocks for testing without deps (loggers).
-- Use in-memory data structures to store transactions.
 
 ### Disclaimer
 Built & Tested on `Linux/Ubuntu 22.04.4 LTS 64-bit` with `GNOME Version 42.9`.

@@ -15,13 +15,17 @@ string Account::getId()
     return id;
 }
 
+string Account::getName()
+{
+    return name;
+}
+
 void Account::withdraw(double amount)
 {
     if (amount <= balance)
     {
         balance -= amount;
     }
-    // You might want to handle the case where amount > balance, e.g., throw an exception or log an error
 }
 
 void Account::deposit(double amount)
