@@ -18,6 +18,7 @@ namespace util
     };
 
     vector<Customer> createCustomersWithInitialBalances();
+    double getRandomAmount(double min = 0.0, double max = 100.0);
     void printCustomersBalancesAfterTxsProcessing(PaymentProcessor &processor);
     void printProcessedTxs(PaymentProcessor &processor);
 }

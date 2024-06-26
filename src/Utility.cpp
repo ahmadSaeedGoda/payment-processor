@@ -2,6 +2,8 @@
 #include "../include/ConsoleLogger.h"
 #include "../include/PaymentProcessor.h"
 
+#include <random>
+
 using namespace std;
 
 namespace util
@@ -16,6 +18,14 @@ namespace util
             customerList.emplace_back(Customer{CUSTOMERS[i], INITIAL_BALANCES[i]});
         }
         return customerList;
+    }
+
+    double getRandomAmount(double min, double max)
+    {
+        static random_device rd;
+        static mt19937 gen(rd());
+        uniform_real_distribution<> dis(min, max);
+        return dis(gen);
     }
 
     void printCustomersBalancesAfterTxsProcessing(PaymentProcessor &processor)
