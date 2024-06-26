@@ -1,5 +1,6 @@
 #include "../include/Utility.h"
 #include "../include/PaymentProcessor.h"
+#include "../include/ThreadPool.h"
 #include <sstream>
 #include <thread>
 
@@ -8,6 +9,7 @@ using namespace util;
 
 const string LOG_FILE_NAME = "transaction_log.log";
 const string ACC_PREFIX = PaymentProcessor::ACCOUNT_PREFIX;
+const int WORKERS_COUNT = 5;
 
 int main()
 {
@@ -26,22 +28,33 @@ int main()
         return processor.processTransaction(acc1, acc2, amount);
     };
 
-    vector<thread> threads;
+    ThreadPool pool(WORKERS_COUNT);
 
-    auto accId1 = processor.getAccounts()[0]->getId();
-    auto accId2 = processor.getAccounts()[1]->getId();
-    threads.emplace_back(lambda, accId1, accId2, 200); // 1=800, 2=700
+    vector<future<bool>> futures;
+    vector<unique_ptr<Account>> createdAccounts = processor.getAccounts();
 
-    auto accId3 = processor.getAccounts()[2]->getId();
-    threads.emplace_back(lambda, accId2, accId3, 150); // 2=550, 3=850
-
-    threads.emplace_back(lambda, accId1, accId3, 300); // 1=500, 3=1150
-
-    threads.emplace_back(lambda, accId1, accId1 + "4", 99999.9999); // Must Fail, because there is no account 4 created
-
-    for (auto &thread : threads)
+    // Pair each account with every other account,
+    // think of it like a feast/game such as in Christmas e.g where everybody treats the other
+    for (size_t i = 0; i < createdAccounts.size(); ++i)
     {
-        thread.join();
+        for (size_t j = i + 1; j < createdAccounts.size(); ++j)
+        {
+            auto accId1 = createdAccounts[i]->getId();
+            auto accId2 = createdAccounts[j]->getId();
+
+            double amount1 = getRandomAmount(0, 1000);
+            double amount2 = getRandomAmount(0, 1000);
+
+            // Enqueue transactions using the thread pool
+            futures.emplace_back(pool.enqueue(lambda, accId1, accId2, amount1));
+            futures.emplace_back(pool.enqueue(lambda, accId2, accId1, amount2));
+        }
+    }
+
+    // Wait for transactions to complete
+    for (auto &future : futures)
+    {
+        future.get();
     }
 
     printCustomersBalancesAfterTxsProcessing(processor);

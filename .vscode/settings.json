@@ -65,7 +65,10 @@
     "unordered_set": "cpp",
     "optional": "cpp",
     "iomanip": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "future": "cpp",
+    "queue": "cpp",
+    "*.tpp": "cpp"
   },
   "cSpell.words": ["ctest", "PAYMENTPROCESSOR"],
   "C_Cpp.default.compilerPath": "/usr/bin/g++-12"
