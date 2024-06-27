@@ -21,9 +21,12 @@ $(TARGET): $(OBJS)
 run:
 	./$(TARGET)
 
+test:
+	make clean && mkdir build && cd build && cmake .. && cmake --build . && ctest --output-on-failure
+
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET)
 
 all: $(TARGET)
 
-.PHONY: clean all
+.PHONY: clean all test
